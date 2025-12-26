@@ -82,7 +82,8 @@ BOOL MsgBusTest_SetParamStringValue(ANSC_HANDLE hInsContext, char* ParamName, ch
     ERR_CHK(rc);
     if ((!ind) && (rc == EOK))
     {
-	AnscCopyString(ParamString, strValue);
+        memset(ParamString, 0, sizeof(ParamString));
+        strncpy(ParamString, strValue, (sizeof(ParamString) - 1));
 	   
         return TRUE;
     }
