@@ -201,7 +201,7 @@ int main(int argc, char* argv[])
     {
         if ((strcmp(argv[idx], "-subsys") == 0))
         {
-            strncpy(g_Subsystem, argv[idx+1], (sizeof(g_Subsystem) - 1));
+            AnscCopyString(g_Subsystem, argv[idx+1]);
         }
         else if (strcmp(argv[idx], "-c") == 0)
         {
