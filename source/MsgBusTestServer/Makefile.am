@@ -18,6 +18,7 @@
 ##########################################################################
 AM_CFLAGS =
 AM_CFLAGS += -I$(top_srcdir)/source/MsgBusTestServer
+AM_CFLAGS += -Wno-error=format
 
 ACLOCAL_AMFLAGS = -I m4
 

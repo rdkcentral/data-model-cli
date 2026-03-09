@@ -193,6 +193,8 @@ int main(int argc, char* argv[])
     DmErr_t err;
     debugLogFile = stderr;
 
+    fprintf(stderr, "Test coverity %s \n");
+
     // Buffer characters till newline for stdout and stderr
     setlinebuf(stdout);
     setlinebuf(stderr);
