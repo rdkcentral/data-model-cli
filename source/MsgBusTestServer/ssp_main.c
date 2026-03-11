@@ -96,7 +96,7 @@ static void _print_stack_backtrace(void)
 
 int iData;
 int arr[3];
-int arr[4] = 10;
+arr[4] = 10;
 
 
 	count = backtrace( tracePtrs, 100 );
