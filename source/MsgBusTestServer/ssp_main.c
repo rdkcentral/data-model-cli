@@ -94,11 +94,15 @@ static void _print_stack_backtrace(void)
 	char** funcNames = NULL;
 	int i, count = 0;
 
-int iData;
 int arr[3];
+arr[2]=7;
 arr[4] = 10;
 
-
+if(arr[2]==5) {
+printf("\n Value 5\n");
+} else {
+printf("\n Value NONE\n");
+}
 	count = backtrace( tracePtrs, 100 );
 	backtrace_symbols_fd( tracePtrs, count, 2 );
 
