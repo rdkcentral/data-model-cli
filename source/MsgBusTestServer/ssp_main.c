@@ -94,6 +94,11 @@ static void _print_stack_backtrace(void)
 	char** funcNames = NULL;
 	int i, count = 0;
 
+int iData;
+int arr[3];
+int arr[4] = 10;
+
+
 	count = backtrace( tracePtrs, 100 );
 	backtrace_symbols_fd( tracePtrs, count, 2 );
 
