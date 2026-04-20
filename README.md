@@ -1,6 +1,6 @@
-# CcspDmCli Documentation
+# CcspDmCli
 
-CcspDmCli (CCSP Data Model Command Line Interface) is a diagnostic and testing tool within the RDK-B middleware stack that provides direct command-line access to the CCSP message bus system. This component serves as a bridge between administrators/engineers, and the TR-181 data model implementation - enabling real-time inspection, modification, and testing of device parameters without requiring full management interface interactions.
+CcspDmCli (CCSP Data Model Command Line Interface) is a diagnostic and testing tool within the RDK-B middleware stack that provides direct command-line access to the CCSP message bus system. This component serves as a bridge between administrators/engineers and the TR-181 data model implementation - enabling real-time inspection, modification, and testing of device parameters without requiring full management interface interactions.
 
 CcspDmCli operates as a lightweight client application that connects to the CCSP message bus infrastructure, allowing users to perform data model operations including parameter retrieval, modification, table management, and attribute manipulation. It serves both as a diagnostic tool for system administrators troubleshooting device configurations and as a development utility for engineers implementing and testing TR-181 parameter support across RDK-B components.
 
@@ -17,7 +17,7 @@ graph LR
     subgraph "RDK-B Platform"
         dmcli["CCSP Dmcli"]
         rbus["RBUS"]
-        rdkbComponent["Other RDK-B Components( WAN Manager, LMLite, onewifi etc.)"]
+        rdkbComponent["Other RDK-B Components (WAN Manager, LMLite, OneWiFi etc.)"]
         subgraph "Platform Layer"
             HAL[Platform HAL]
             Linux[Linux]
@@ -32,7 +32,7 @@ graph LR
     dmcli -->rbus
 
     rbus <-->|IPC| rdkbComponent
-
+    
     %% Interface Managers to HAL
     rdkbComponent -->|HAL APIs| HAL
 
@@ -67,7 +67,7 @@ CcspDmCli follows a client-server architectural pattern where it operates as a l
 
 The core design principle centers around providing transparent access to the CCSP message bus infrastructure through an intuitive command-line interface. CcspDmCli abstracts the complexity of CCSP protocol interactions, component discovery mechanisms, and namespace resolution while preserving full access to the underlying TR-181 data model functionality. The design emphasizes robustness through comprehensive error handling, timeout management, and graceful degradation in distributed system scenarios.
 
-The interaction design with northbound interfaces (users and scripts) utilizes a command-driven approach with standardized syntax patterns that mirror TR-181 parameter structures. Southbound interactions with the CCSP message bus leverage the standard CCSP protocol stack including component registration, namespace discovery, and parameter operation routing. The design integrates seamlessly with PSM for persistent data operations and supports both synchronous request-response patterns and asynchronous event handling for comprehensive system integration.
+The interaction design with northbound interfaces (users and scripts) utilizes a command-driven approach with standardized syntax patterns that mirror TR-181 parameter structures. Southbound interactions with the CCSP message bus leverage the standard CCSP protocol stack including component registration, namespace discovery, and parameter operation routing. The design integrates seamlessly with PSM for persistent data operations and primarily uses synchronous request-response patterns for system integration.
 
 IPC mechanisms are implemented through the standard CCSP message bus infrastructure, utilizing RBus transport layers depending on platform configuration. The design accommodates both protocols through abstraction layers that maintain consistent API behavior regardless of underlying transport implementation. Message serialization follows CCSP protocol standards with support for all TR-181 data types and complex parameter structures.
 
@@ -336,12 +336,12 @@ CcspDmCli is structured as a monolithic command-line application with functional
 
 | Module/Class | Description | Key Files |
 |-------------|------------|-----------|
-| Command Parser | Processes user input, validates command syntax, and prepares parameter structures for CCSP operations. Handles both interactive and batch file input processing. | `ccsp_message_bus_client_tool.c` (lines 2192-2400) |
-| CCSP Integration Layer | Manages message bus connectivity, component discovery, and CCSP protocol communication. Implements request-response handling and timeout management. | `ccsp_message_bus_client_tool.c` (lines 572-700) |
-| Parameter Operations Engine | Implements core TR-181 operations including getvalues, setvalues, getnames, addtable, deltable with comprehensive error handling and result formatting. | `ccsp_message_bus_client_tool.c` (lines 1000-1700) |
-| PSM Operations Module | Provides direct PSM access commands (psmget, psmset, psmdel) for persistent configuration management bypassing standard component routing. | `ccsp_message_bus_client_tool.c` (lines 1800-2000) |
-| Output Formatter | Handles result formatting, color-coded output generation, and performance metrics display for enhanced user experience. | `ccsp_message_bus_client_tool.c` (lines 200-400) |
-| Error Handler | Manages comprehensive error detection, logging, signal handling, and graceful degradation for robust operation in distributed environments. | `ccsp_message_bus_client_tool.c` (lines 350-450) |
+| Command Parser | Processes user input, validates command syntax, and prepares parameter structures for CCSP operations. Handles both interactive and batch file input processing. | `ccsp_message_bus_client_tool.c` |
+| CCSP Integration Layer | Manages message bus connectivity, component discovery, and CCSP protocol communication. Implements request-response handling and timeout management. | `ccsp_message_bus_client_tool.c` |
+| Parameter Operations Engine | Implements core TR-181 operations including getvalues, setvalues, getnames, addtable, deltable with comprehensive error handling and result formatting. | `ccsp_message_bus_client_tool.c` |
+| PSM Operations Module | Provides direct PSM access commands (psmget, psmset, psmdel) for persistent configuration management bypassing standard component routing. | `ccsp_message_bus_client_tool.c` |
+| Output Formatter | Handles result formatting, color-coded output generation, and performance metrics display for enhanced user experience. | `ccsp_message_bus_client_tool.c` |
+| Error Handler | Manages comprehensive error detection, logging, signal handling, and graceful degradation for robust operation in distributed environments. | `ccsp_message_bus_client_tool.c` |
 
 
 ## Component Interactions
@@ -352,15 +352,15 @@ CcspDmCli operates as a CCSP message bus client that interfaces with the complet
 
 | Target Component/Layer | Interaction Purpose | Key APIs/Endpoints |
 |------------------------|--------------------|--------------------|
-| **RDK-B Middleware Components** |
+| **RDK-B Middleware Components** | | |
 | Component Registrar (CR) | Component discovery and namespace resolution for TR-181 parameter routing | `CcspBaseIf_discComponentSupportingNamespace`, `CcspBaseIf_discNamespaceComponents` |
 | PSM Component | Direct persistent parameter storage access bypassing standard component routing | `PSM_Get_Record_Value2`, `PSM_Set_Record_Value2`, `PSM_Del_Record` |
 | P&M Component | Device management parameters, system information, and platform configuration | `CcspBaseIf_getParameterValues`, `CcspBaseIf_setParameterValues` |
 | OneWiFi | Wireless network configuration, radio management, and SSID operations | `CcspBaseIf_getParameterValues`, `CcspBaseIf_setParameterValues`, `CcspBaseIf_AddTblRow` |
-| **System & Platform Layers** |
+| **System & Platform Layers** | | |
 | File System | Batch command file processing and configuration file access | `fopen()`, `fgets()`, `fclose()` |
-| CCSP Message Bus Infrastructure | Core message bus connectivity and protocol transport | `CCSP_Message_Bus_Init`, `CCSP_Message_Bus_Send_Msg` |
-| **External Systems** |
+| CCSP Message Bus Infrastructure | Core message bus connectivity and protocol transport | `CCSP_Message_Bus_Init`, `CCSP_Message_Bus_Exit` |
+| **External Systems** | | |
 | Test Automation Frameworks | Automated testing support and validation operations | CLI command execution with text output parsing |
 | Management Scripts | Bulk operations and administrative task automation | CLI command execution with exit codes and text output |
 
@@ -433,4 +433,4 @@ CcspDmCli operates at the CCSP middleware layer and does not directly integrate 
 - **Subsystem Prefix**: Configurable via first command line argument (eRT, eMG, eEP, simu) determining component discovery scope and namespace routing
 - **Message Bus Config**: Optional second argument specifying alternative message bus configuration file path for testing and development scenarios  
 - **Operation Mode**: Interactive mode (default), batch file processing, or single command execution determined by argument structure and input source
-- **Timeout Configuration**: Hardcoded 1-second default timeout with configurable extensions for slow component responses and testing scenarios
+- **Timeout Configuration**: No dmcli-specific hardcoded timeout is present in the source; operation timeouts are governed by the underlying CCSP/message-bus APIs and their runtime configuration, so any timeout tuning should be done in the relevant CCSP or bus configuration rather than via a dmcli command-line setting
