@@ -1818,10 +1818,18 @@ STATIC int analyse_cmd (char **args, PCMD_CONTENT pInputCmd)
     if ( strncmp( *args, "setsub", 6 ) == 0 )
     {
          if(*(args+1) != NULL)
-         rc = strncpy_s(subsystem_prefix, sizeof(subsystem_prefix), *(args+1), strlen(*(args+1)));
-         if(rc != EOK)
          {
-             RDK_SAFECLIB_ERR("strncpy_s");
+             if (strlen(*(args+1)) >= sizeof(subsystem_prefix))
+             {
+                 printf("subsystem prefix must be shorter than %zu bytes\n", sizeof(subsystem_prefix));
+                 goto EXIT1;
+             }
+             rc = strncpy_s(subsystem_prefix, sizeof(subsystem_prefix), *(args+1), sizeof(subsystem_prefix) - 1);
+             subsystem_prefix[sizeof(subsystem_prefix) - 1] = '\0';
+             if(rc != EOK)
+             {
+                 RDK_SAFECLIB_ERR("strncpy_s");
+             }
          }
          printf("subsystem_prefix %s\n", subsystem_prefix);
          return -3;
@@ -2287,21 +2295,44 @@ int main (int argc, char *argv[])
         }
         if((rc == EOK) && (ind != 0))
         {
-            rc = strncpy_s(dst_pathname_cr,  sizeof(dst_pathname_cr), argv[idx], strlen(argv[idx]));
+            if (strlen(argv[idx]) >= sizeof(dst_pathname_cr))
+            {
+                printf("subsystem argument is too long\n");
+                return -1;
+            }
+            rc = strncpy_s(dst_pathname_cr,  sizeof(dst_pathname_cr), argv[idx], sizeof(dst_pathname_cr) - 1);
+            dst_pathname_cr[sizeof(dst_pathname_cr) - 1] = '\0';
             if(rc != EOK)
             {
                  RDK_SAFECLIB_ERR("strncpy_s");
             }
 
             iLen = strlen(dst_pathname_cr);
+	    if (iLen == 0)
+	    {
+                printf("subsystem argument must not be empty\n");
+                return -1;
+	    }
 
             if ( dst_pathname_cr[iLen - 1] != '.' )
             {
+		if ((size_t)iLen >= sizeof(dst_pathname_cr) - 1)
+		{
+                    printf("subsystem argument has no room for a trailing dot\n");
+                    return -1;
+		}
                 dst_pathname_cr[iLen]       = '.';
                 dst_pathname_cr[iLen + 1]   = 0;
+		iLen++;
             }
-            
-            rc = strncpy_s(subsystem_prefix,  sizeof(subsystem_prefix), dst_pathname_cr, strlen(dst_pathname_cr));
+
+            if ((size_t)iLen >= sizeof(subsystem_prefix))
+            {
+                printf("subsystem prefix must be shorter than %zu bytes\n", sizeof(subsystem_prefix));
+                return -1;
+            }
+            rc = strncpy_s(subsystem_prefix,  sizeof(subsystem_prefix), dst_pathname_cr, sizeof(subsystem_prefix) - 1);
+            subsystem_prefix[sizeof(subsystem_prefix) - 1] = '\0';
             if(rc != EOK)
             {
                 RDK_SAFECLIB_ERR("strncpy_s");
