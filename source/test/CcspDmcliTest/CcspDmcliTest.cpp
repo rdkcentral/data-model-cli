@@ -157,7 +157,14 @@ TEST_F(DmcliTest, Main_call_arg_equalto_2_and_argv_is_not_help_return_in_strcmp_
     ));
 
     EXPECT_CALL(*g_safecLibMock, _strncpy_s_chk(_, _, _, _, _, _))
-    .WillRepeatedly(testing::Return(0));
+    .WillRepeatedly(testing::Invoke([](char *dest, size_t dmax, const char *src, size_t slen,size_t, size_t) -> errno_t {
+        if (dest && src && dmax > 0 && slen > 0) {
+            size_t copy_len = slen < dmax ? slen : dmax - 1;
+            strncpy(dest, src, copy_len);
+            dest[copy_len] = '\0';
+        }
+        return 0;
+    }));
 
     EXPECT_CALL(*g_safecLibMock, _strcat_s_chk(_, _, _, _))
     .WillRepeatedly(testing::Return(0));
@@ -1756,6 +1763,58 @@ TEST_F(DmcliTest, analyse_cmd_setsub_with_strcpy_fail) {
             ::testing::SetArrayArgument<0>("subsystem", "subsystem" + strlen("subsystem") + 1),
             ::testing::Return(-1)
         ));
+
+    int ret = analyse_cmd(args, pInputCmd);
+    EXPECT_EQ(-3, ret);
+
+    free(pInputCmd);
+    pInputCmd = NULL;
+}
+
+TEST_F(DmcliTest, analyse_cmd_setsub_with_31byte_prefix) {
+    char prefix_31[32];
+    memset(prefix_31, 'a', 31);
+    prefix_31[31] = '\0';
+    char *args[] = {"setsub", prefix_31};
+    PCMD_CONTENT pInputCmd = (PCMD_CONTENT)malloc(sizeof(CMD_CONTENT));
+    ASSERT_NE(pInputCmd, nullptr);
+
+    EXPECT_CALL(*g_safecLibMock, _strncpy_s_chk(_, _, _, _, _, _))
+        .WillOnce(::testing::Invoke([prefix_31](char *dest, size_t dmax, const char *src, size_t slen, size_t, size_t) -> errno_t {
+            if (dest && src && dmax > 0) {
+                size_t copy_len = slen < dmax ? slen : dmax - 1;
+                strncpy(dest, src, copy_len);
+                dest[copy_len] = '\0';
+            }
+            return 0;
+        }));
+
+    int ret = analyse_cmd(args, pInputCmd);
+    EXPECT_EQ(-3, ret);
+    EXPECT_STREQ(prefix_31, subsystem_prefix);
+    free(pInputCmd);
+    pInputCmd = NULL;
+}
+
+TEST_F(DmcliTest, analyse_cmd_setsub_with_32byte_prefix_exceeds_limit) {
+    char prefix_32[33];
+    memset(prefix_32, 'a', 32);
+    prefix_32[32] = '\0';
+    char *args[] = {"setsub", prefix_32};
+    PCMD_CONTENT pInputCmd = (PCMD_CONTENT)malloc(sizeof(CMD_CONTENT));
+    ASSERT_NE(pInputCmd, nullptr);
+
+    int ret = analyse_cmd(args, pInputCmd);
+    EXPECT_EQ(0, ret);
+
+    free(pInputCmd);
+    pInputCmd = NULL;
+}
+
+TEST_F(DmcliTest, analyse_cmd_setsub_with_null_argument) {
+    char *args[] = {"setsub", NULL};
+    PCMD_CONTENT pInputCmd = (PCMD_CONTENT)malloc(sizeof(CMD_CONTENT));
+    ASSERT_NE(pInputCmd, nullptr);
 
     int ret = analyse_cmd(args, pInputCmd);
     EXPECT_EQ(-3, ret);
